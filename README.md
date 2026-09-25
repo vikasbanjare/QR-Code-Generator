@@ -32,6 +32,12 @@ Checks re-run live on every change:
 
 If any check fails, exporting needs an explicit confirmation.
 
+## Use it online
+
+**https://vikasbanjare.github.io/QR-Code-Generator/**
+
+It works on any laptop or phone with nothing to install. Every push to the default branch rebuilds the site automatically (`.github/workflows/deploy.yml`).
+
 ## Development
 
 ```bash
