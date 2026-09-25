@@ -8,10 +8,10 @@ import {
   MIN_QUIET_ZONE,
   type Design,
   type EcLevel,
-} from '../lib/design';
-import { buildMatrix } from '../lib/matrix';
-import { renderSvg } from '../lib/render';
-import { ColorInput, Segmented, Slider, TextInput, Toggle } from './ui';
+} from '../../../lib/design';
+import { buildMatrix } from '../../../lib/matrix';
+import { renderSvg } from '../../../lib/render';
+import { ColorInput, Segmented, Slider, TextInput, Toggle } from '../../../components/ui';
 
 type Tab = 'shape' | 'color' | 'logo' | 'frame' | 'advanced';
 

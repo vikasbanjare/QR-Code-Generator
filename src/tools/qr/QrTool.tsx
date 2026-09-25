@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ContentForm } from './components/ContentForm';
 import { DesignPanel } from './components/DesignPanel';
-import { Segmented, TextInput } from './components/ui';
-import { DEFAULT_DESIGN, type Design } from './lib/design';
-import { exportPdf, exportPng, exportReport, exportSvg, type ExportFormat } from './lib/exporters';
-import { buildMatrix, resolveEcLevel, type QrMatrix } from './lib/matrix';
-import { CONTENT_LABELS, DEFAULT_CONTENT, encodeContent, type ContentData, type ContentDataMap, type ContentType } from './lib/payloads';
-import { renderSvg } from './lib/render';
-import { runSafetyChecks, worstSeverity, type Check, type Severity } from './lib/safety';
-import { runScanTest, type ScanResult } from './lib/scanTest';
-import { BUILT_IN_TEMPLATES, loadTemplates, saveTemplates, type Template } from './lib/templates';
+import { Segmented, TextInput } from '../../components/ui';
+import { DEFAULT_DESIGN, type Design } from '../../lib/design';
+import { exportPdf, exportPng, exportReport, exportSvg, type ExportFormat } from '../../lib/exporters';
+import { buildMatrix, resolveEcLevel, type QrMatrix } from '../../lib/matrix';
+import { CONTENT_LABELS, DEFAULT_CONTENT, encodeContent, type ContentData, type ContentDataMap, type ContentType } from '../../lib/payloads';
+import { renderSvg } from '../../lib/render';
+import { runSafetyChecks, worstSeverity, type Check, type Severity } from '../../lib/safety';
+import { runScanTest, type ScanResult } from '../../lib/scanTest';
+import { BUILT_IN_TEMPLATES, loadTemplates, saveTemplates, type Template } from '../../lib/templates';
 
 const PRINT_PRESETS = [
   { id: 'packaging', label: 'Packaging (2 cm)', mm: 20 },
@@ -24,6 +24,20 @@ const PRINT_PRESETS = [
 const SEVERITY_ICON: Record<Severity, string> = { pass: '✓', warn: '!', fail: '✕' };
 const SEVERITY_TEXT: Record<Severity, string> = { pass: 'Pass', warn: 'Warning', fail: 'Fail' };
 
+function CheckList({ checks }: { checks: Check[] }) {
+  if (!checks.length) return null;
+  return (
+    <ul className="checks">
+      {checks.map((c) => (
+        <li key={c.id} className={`check check-${c.severity}`}>
+          <span className="check-icon" aria-label={SEVERITY_TEXT[c.severity]}>{SEVERITY_ICON[c.severity]}</span>
+          <span><strong>{c.label}</strong> {c.detail}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 async function sha256(text: string): Promise<string> {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
@@ -33,9 +47,11 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'qr-code';
 }
 
-export default function App() {
+export function QrTool({ initialUrl }: { initialUrl?: string }) {
   const [type, setType] = useState<ContentType>('url');
-  const [content, setContent] = useState<ContentDataMap>(DEFAULT_CONTENT);
+  const [content, setContent] = useState<ContentDataMap>(() =>
+    initialUrl ? { ...DEFAULT_CONTENT, url: { url: initialUrl } } : DEFAULT_CONTENT,
+  );
   const [design, setDesign] = useState<Design>(DEFAULT_DESIGN);
   const [printMm, setPrintMm] = useState(40);
   const [name, setName] = useState('qr-code');
@@ -172,16 +188,8 @@ export default function App() {
   const failing = allChecks.filter((c) => c.severity === 'fail');
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          <span className="logo-mark" aria-hidden="true" />
-          <span>QR Studio</span>
-        </div>
-        <span className="badge">Static · never expires</span>
-      </header>
-
-      <main className="layout">
+    <div className="qr-tool">
+      <div className="layout">
         <div className="column">
           <section className="card" aria-labelledby="content-heading">
             <h2 id="content-heading"><span className="step">1</span>Content</h2>
@@ -255,14 +263,14 @@ export default function App() {
                         : 'Scannable, with warnings'}
               </strong>
             </div>
-            <ul className="checks">
-              {allChecks.map((c) => (
-                <li key={c.id} className={`check check-${c.severity}`}>
-                  <span className="check-icon" aria-label={SEVERITY_TEXT[c.severity]}>{SEVERITY_ICON[c.severity]}</span>
-                  <span><strong>{c.label}</strong> {c.detail}</span>
-                </li>
-              ))}
-            </ul>
+            {/* Problems stay visible; passing checks fold away so the panel stays calm. */}
+            <CheckList checks={allChecks.filter((c) => c.severity !== 'pass')} />
+            {allChecks.some((c) => c.severity === 'pass') && (
+              <details className="checks-more">
+                <summary>Show all {allChecks.length} checks</summary>
+                <CheckList checks={allChecks.filter((c) => c.severity === 'pass')} />
+              </details>
+            )}
           </section>
 
           <section className="card">
@@ -296,7 +304,7 @@ export default function App() {
             {notice && <p className="notice" role="status">{notice}</p>}
           </section>
         </aside>
-      </main>
+      </div>
 
       <dialog ref={dialogRef} className="dialog" onClose={() => setPendingExport(null)}>
         <h2>This design may not scan</h2>

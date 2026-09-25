@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Link not found</title>
+<style>
+  :root { --navy: #043b72; --orange: #f58220; --bg: #f3f8ff; --muted: #5a6b80; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg); color: #0e2239;
+    font-family: 'Open Sans', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif; padding: 16px; }
+  main { max-width: 420px; text-align: center; }
+  h1 { color: var(--navy); font-size: 28px; margin: 0 0 8px; }
+  p { color: var(--muted); line-height: 1.6; }
+  a { display: inline-block; margin-top: 12px; padding: 11px 20px; border-radius: 10px; background: var(--orange);
+    color: #1d0e00; font-weight: 700; text-decoration: none; }
+  #checking { font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <p id="checking">Looking up this link…</p>
+  <div id="missing" hidden>
+    <h1>This link doesn’t exist</h1>
+    <p>Check the spelling. If it was created in the last couple of minutes, it may still be publishing — try again shortly.</p>
+    <a id="home" href="/">Go to the homepage</a>
+  </div>
+</main>
+<script>
+  (function () {
+    // Project sites live under /<repo>/; custom domains live at the root.
+    var parts = location.pathname.split('/').filter(Boolean);
+    var base = /\.github\.io$/.test(location.hostname) && parts.length ? '/' + parts.shift() + '/' : '/';
+    document.getElementById('home').href = base;
+    var slug = (parts[0] || '').toLowerCase();
+    function missing() {
+      document.getElementById('checking').hidden = true;
+      document.getElementById('missing').hidden = false;
+    }
+    if (!slug) return missing();
+    // Forgive case differences (e.g. /Menu → /menu) by checking the published links list.
+    fetch(base + 'links.json', { cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        var link = data && data.links && data.links[slug];
+        if (link && /^https?:\/\//i.test(link.url)) location.replace(link.url);
+        else missing();
+      })
+      .catch(missing);
+  })();
+</script>
+</body>
+</html>

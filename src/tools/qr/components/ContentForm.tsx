@@ -1,5 +1,5 @@
-import type { ContentDataMap, ContentType, VCardData } from '../lib/payloads';
-import { Segmented, TextInput, Toggle } from './ui';
+import type { ContentDataMap, ContentType, VCardData } from '../../../lib/payloads';
+import { Segmented, TextInput, Toggle } from '../../../components/ui';
 
 interface Props<K extends ContentType> {
   type: K;

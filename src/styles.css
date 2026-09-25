@@ -34,38 +34,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 :focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
 
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 24px;
-  background: var(--navy);
-  color: #fff;
-}
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
-.logo-mark {
-  width: 22px; height: 22px; border-radius: 5px;
-  background:
-    linear-gradient(var(--orange), var(--orange)) 3px 3px / 7px 7px no-repeat,
-    linear-gradient(#fff, #fff) 12px 12px / 7px 7px no-repeat,
-    rgb(255 255 255 / 18%);
-}
-.badge {
-  font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
-  background: rgb(255 255 255 / 14%);
-}
-
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
   gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px 16px 48px;
 }
 .column { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-.preview-column { position: sticky; top: 16px; align-self: start; }
+.preview-column { position: sticky; top: 84px; align-self: start; }
 
 /* Single column on small screens: preview first, export last. */
 @media (max-width: 860px) {

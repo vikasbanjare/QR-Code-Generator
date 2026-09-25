@@ -1,10 +1,16 @@
-# QR Studio
+# Forever Tools
 
-A static QR code generator with a design studio and a scan-safety engine. This is the MVP from the product blueprint.
+Free web tools that never expire, starting with a **QR Code Generator** and a **Link Shortener**. It's a static site hosted on GitHub Pages, with no server, database or subscription.
 
-Every code is **static**: the content is encoded directly into the symbol. There is no redirect, no account and no subscription, so a printed code keeps working for as long as its destination does. Everything runs in the browser, and no content leaves the device.
+## Use it online
 
-## What's in the MVP
+**https://vikasbanjare.github.io/QR-Code-Generator/**
+
+It works on any laptop or phone with nothing to install. Every push to the default branch rebuilds the site automatically (`.github/workflows/deploy.yml`).
+
+## QR Code Generator
+
+Every code is **static**: the content is encoded directly into the symbol. There's no redirect, account or subscription, so a printed code keeps working for as long as its destination does. Everything runs in the browser.
 
 | Area | Included |
 | --- | --- |
@@ -32,11 +38,21 @@ Checks re-run live on every change:
 
 If any check fails, exporting needs an explicit confirmation.
 
-## Use it online
+## Link Shortener
 
-**https://vikasbanjare.github.io/QR-Code-Generator/**
+Short links live in [`links.json`](links.json) in this repository. At build time, each entry becomes a static redirect page at `/<name>/`, which works with or without JavaScript.
 
-It works on any laptop or phone with nothing to install. Every push to the default branch rebuilds the site automatically (`.github/workflows/deploy.yml`).
+- **Creating and editing links:** open the Link Shortener and connect a fine-grained GitHub token (Contents: Read and write, only on this repository). The page commits to `links.json`, and the Pages workflow republishes the site, which usually takes 1–2 minutes. The token stays in that browser.
+- **Why links don't break:** there's no database or third-party service. A link works for as long as this repository and its Pages site exist. If the token expires, existing links are unaffected.
+- **Deleting links:** there's no delete button, on purpose. A deleted link breaks everywhere it was printed or shared, so point it somewhere else instead. To remove one anyway, edit `links.json` on GitHub.
+- **Safety:** only `http(s)` destinations are accepted. Invalid entries are skipped at build time, and redirect pages escape their URLs.
+- **Limits:** there are no click statistics (no server to count clicks), and the links use this site's address. For shorter links, add a custom domain in *Settings → Pages*. Existing links move with it, but the domain then has to be renewed every year.
+
+## Adding a new tool
+
+1. Build the page in `src/tools/<id>/`.
+2. Add an entry to `TOOLS` in `src/site/tools.ts`, which shows it on the landing page, nav and footer.
+3. Add one route line in `src/site/Site.tsx`.
 
 ## Development
 
@@ -59,7 +75,12 @@ src/lib/render.ts     SVG renderer (single source for all exports)
 src/lib/safety.ts     scan-safety checks
 src/lib/scanTest.ts   decode-after-render test (browser)
 src/lib/exporters.ts  SVG / PNG / PDF / report downloads
-src/components/       React UI
+src/lib/shortlinks.ts short-link validation + redirect page generation
+src/lib/github.ts     commits links.json via the GitHub API
+src/site/             landing page, header/footer, router, tool registry
+src/tools/qr/         QR Code Generator UI
+src/tools/links/      Link Shortener UI
+links.json            the short links
 tests/                vitest suites
 ```
 
